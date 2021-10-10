@@ -1,0 +1,190 @@
+﻿<Window x:Class="AstLab3.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AstLab3"
+        mc:Ignorable="d"
+        Title="{Binding Title}" Height="980" Width="1520"
+        DataContext="{Binding MainWindowModel, Source={StaticResource Locator}}">
+    <Window.Resources>
+        <Style TargetType="DataGrid">
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="CanUserSortColumns" Value="False"/>
+            <Setter Property="AlternatingRowBackground" Value="Aquamarine"/>
+            <Setter Property="VerticalGridLinesBrush" Value="BlueViolet"/>
+            <Setter Property="GridLinesVisibility" Value="Vertical"/>
+        </Style>
+    </Window.Resources>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Close" Command="{StaticResource CloseWindowCommand}"/>
+            </MenuItem>
+            <MenuItem Header="Help"/>
+        </Menu>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem Content="{Binding Status}"/>
+        </StatusBar>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <GridSplitter Grid.Row="1" Height="3" Background="Blue" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+            <ListBox Grid.Row="2" MinHeight="100"/>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MinWidth="200" Width="350"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <GroupBox Grid.Column="0" Header="Ввод данных">
+                    <DockPanel Margin="0,5">
+                        <StackPanel DockPanel.Dock="Top">
+                            <TextBlock Text="Получить таблицу из файла"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,5">
+                                <TextBox Width="250" Text="{Binding Path=Path, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Button Content="Открыть" Width="50" Margin="5,0"
+                                    Command="{Binding BrowseCommand}"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <UniformGrid Columns="2" Rows="2" DockPanel.Dock="Bottom">
+                            <UniformGrid.Resources>
+                                <Style TargetType="Button">
+                                    <Setter Property="Margin" Value="5"/>
+                                </Style>
+                            </UniformGrid.Resources>
+                            <Button Content="Добавить" Command="{Binding AddWorkCommand}"/>
+                            <Button Content="Удалить выбранную" Command="{Binding RemoveSelectedWorkCommand}"/>
+                            <Button Content="Перезагрузить" Command="{Binding ReloadSourceTableCommand}"/>
+                            <Button Content="Очистить" Command="{Binding ClearSourceTableCommand}"/>
+                        </UniformGrid>
+                        <DockPanel>
+                            <TextBlock Text="Исходная таблица" DockPanel.Dock="Top" Margin="0,5"/>
+                            <DataGrid ItemsSource="{Binding SourceTable}" SelectedItem="{Binding SelectedWork}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Событие А" Width="*" Binding="{Binding FirstEventID}"/>
+                                    <DataGridTextColumn Header="Событие В" Width="*" Binding="{Binding SecondEventID}"/>
+                                    <DataGridTextColumn Header="Длительность работы" Width="*" Binding="{Binding Length}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </DockPanel>
+                </GroupBox>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <Button Content="→" Width="75" Command="{Binding StreamlineCommand}"/>
+                </StackPanel>
+                <GroupBox Header="Вывод данных" Grid.Column="2">
+                    <GroupBox.Resources>
+                        <Style TargetType="DockPanel">
+                            <Setter Property="Margin" Value="3"/>
+                        </Style>
+                    </GroupBox.Resources>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="215*"/>
+                            <RowDefinition Height="583*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="5">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Найдено полных путей:"/>
+                                <TextBlock Text="" Margin="5,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,3">
+                                <TextBlock Text="Найдено критических путей:"/>
+                                <TextBlock Text="" Margin="5,0"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,3">
+                                <TextBlock Text="Длина критического пути:"/>
+                                <TextBlock Text="" Margin="5,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <DockPanel Grid.Row="1">
+                            <TextBlock Text="Частично упорядоченный график" DockPanel.Dock="Top"/>
+                            <Button Content="Очистить" DockPanel.Dock="Bottom" Width="75" HorizontalAlignment="Right"
+                                Command="{Binding ClearFinalTableCommand}"/>
+                            <DataGrid Margin="0,5" ItemsSource="{Binding FinalTable}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Событие А" Width="*" Binding="{Binding FirstEventID}"/>
+                                    <DataGridTextColumn Header="Событие В" Width="*" Binding="{Binding SecondEventID}"/>
+                                    <DataGridTextColumn Header="Длительность работы" Width="*" Binding="{Binding Length}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                        <DockPanel Grid.Row="1" Grid.Column="1">
+                            <TextBlock Text="Таблица параметоров событий" DockPanel.Dock="Top"/>
+                            <Button Content="Очистить" DockPanel.Dock="Bottom" Width="75" HorizontalAlignment="Right"
+                                Command="{Binding ClearFinalTableCommand}"/>
+                            <DataGrid Margin="0,5" ItemsSource="{Binding FinalTable}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Событие"/>
+                                    <DataGridTextColumn Width="*">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Ранний срок события" TextWrapping="Wrap"/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Width="*">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Поздний срок события" TextWrapping="Wrap"/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Width="*">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Резерв времени" TextWrapping="Wrap"/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                        <DockPanel Grid.Row="1" Grid.Column="2">
+                            <TextBlock Text="Таблица параметров работ" DockPanel.Dock="Top"/>
+                            <Button Content="Очистить" DockPanel.Dock="Bottom" Width="75" HorizontalAlignment="Right"
+                                Command="{Binding ClearFinalTableCommand}"/>
+                            <DataGrid Margin="0,5" ItemsSource="{Binding FinalTable}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Работа" Width="*"/>
+                                    <DataGridTextColumn Width="*">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Продолжительность" TextWrapping="Wrap"/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Width="*">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Полный резерв времени" TextWrapping="Wrap"/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Width="*">
+                                        <DataGridTextColumn.Header>
+                                            <TextBlock Text="Независимый резерв времени" TextWrapping="Wrap"/>
+                                        </DataGridTextColumn.Header>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                        <DockPanel Grid.Row="0" Grid.Column="1">
+                            <TextBlock Text="Список полных путей" DockPanel.Dock="Top"/>
+                            <Button Content="Очистить" DockPanel.Dock="Bottom" Width="75" HorizontalAlignment="Right"
+                                Command="{Binding ClearListBoxCommand}"/>
+                            <ListBox Margin="0,5" ItemsSource="{Binding FullPathsInTheGraph}"/>
+                        </DockPanel>
+                        <DockPanel Grid.Row="0" Grid.Column="2">
+                            <TextBlock Text="Список работ в критических путях" DockPanel.Dock="Top"/>
+                            <Button Content="Очистить" DockPanel.Dock="Bottom" Width="75" HorizontalAlignment="Right"
+                                Command="{Binding ClearListBoxCommand}"/>
+                            <ListBox Margin="0,5" ItemsSource="{Binding FullPathsInTheGraph}"/>
+                        </DockPanel>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>
