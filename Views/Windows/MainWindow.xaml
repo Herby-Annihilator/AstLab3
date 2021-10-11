@@ -34,8 +34,10 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
-            <GridSplitter Grid.Row="1" Height="3" Background="Blue" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
-            <ListBox Grid.Row="2" MinHeight="100"/>
+            <GridSplitter Grid.Row="1" Height="2" Background="Blue" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+            <DockPanel Grid.Row="2" MinHeight="100">
+                <ListBox ItemsSource="{Binding LogBuffer}" VerticalAlignment="Stretch"/>
+            </DockPanel>
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MinWidth="200" Width="350"/>
@@ -67,8 +69,8 @@
                             <TextBlock Text="Исходная таблица" DockPanel.Dock="Top" Margin="0,5"/>
                             <DataGrid ItemsSource="{Binding SourceTable}" SelectedItem="{Binding SelectedWork}">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Событие А" Width="*" Binding="{Binding FirstEventID}"/>
-                                    <DataGridTextColumn Header="Событие В" Width="*" Binding="{Binding SecondEventID}"/>
+                                    <DataGridTextColumn Header="Событие А" Width="*" Binding="{Binding StartVertex.ID}"/>
+                                    <DataGridTextColumn Header="Событие В" Width="*" Binding="{Binding EndVertex.ID}"/>
                                     <DataGridTextColumn Header="Длительность работы" Width="*" Binding="{Binding Length}"/>
                                 </DataGrid.Columns>
                             </DataGrid>
@@ -114,8 +116,8 @@
                                 Command="{Binding ClearFinalTableCommand}"/>
                             <DataGrid Margin="0,5" ItemsSource="{Binding FinalTable}">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Событие А" Width="*" Binding="{Binding FirstEventID}"/>
-                                    <DataGridTextColumn Header="Событие В" Width="*" Binding="{Binding SecondEventID}"/>
+                                    <DataGridTextColumn Header="Событие А" Width="*" Binding="{Binding StartVertex.ID}"/>
+                                    <DataGridTextColumn Header="Событие В" Width="*" Binding="{Binding EndVertex.ID}"/>
                                     <DataGridTextColumn Header="Длительность работы" Width="*" Binding="{Binding Length}"/>
                                 </DataGrid.Columns>
                             </DataGrid>
@@ -173,14 +175,14 @@
                         <DockPanel Grid.Row="0" Grid.Column="1">
                             <TextBlock Text="Список полных путей" DockPanel.Dock="Top"/>
                             <Button Content="Очистить" DockPanel.Dock="Bottom" Width="75" HorizontalAlignment="Right"
-                                Command="{Binding ClearListBoxCommand}"/>
+                                Command="{Binding ClearFullPathsInGraphCommand}"/>
                             <ListBox Margin="0,5" ItemsSource="{Binding FullPathsInTheGraph}"/>
                         </DockPanel>
                         <DockPanel Grid.Row="0" Grid.Column="2">
                             <TextBlock Text="Список работ в критических путях" DockPanel.Dock="Top"/>
                             <Button Content="Очистить" DockPanel.Dock="Bottom" Width="75" HorizontalAlignment="Right"
-                                Command="{Binding ClearListBoxCommand}"/>
-                            <ListBox Margin="0,5" ItemsSource="{Binding FullPathsInTheGraph}"/>
+                                />
+                            <ListBox Margin="0,5"/>
                         </DockPanel>
                     </Grid>
                 </GroupBox>
