@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AstLab3.Models.NetworkSchedule
+namespace AstLab3.Models.Schedules
 {
 	public class NetworkSchedule
 	{
