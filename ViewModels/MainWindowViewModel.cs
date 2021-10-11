@@ -33,6 +33,10 @@ namespace AstLab3.ViewModels
 			ReloadSourceTableCommand = new LambdaCommand(OnReloadSourceTableCommandExecuted, CanReloadSourceTableCommandExecute);
 			ClearFinalTableCommand = new LambdaCommand(OnClearFinalTableCommandExecuted, CanClearFinalTableCommandExecute);
 			ClearFullPathsInGraphCommand = new LambdaCommand(OnClearFullPathsInGraphCommandExecuted, CanClearFullPathsInGraphCommandExecute);
+			ClearWorksInCriticalPathsCommand = new LambdaCommand(OnClearWorksInCriticalPathsCommandExecuted,
+				CanClearWorksInCriticalPathsCommandExecute);
+			ClearVerticescParamsTableCommand = new LambdaCommand(OnClearVerticescParamsTableCommandExecuted, 
+				CanClearVerticescParamsTableCommandExecute);
 		}
 
 		private void LogMessageToLogFile(object sender, LoggerEventArgs e)
@@ -44,7 +48,7 @@ namespace AstLab3.ViewModels
 
 		private void LogMessage(object sender, LoggerEventArgs e)
 		{
-			LogBuffer.Add(e.Message);
+			LogBuffer.Insert(0, e.Message);
 		}
 
 		#region Properties
@@ -56,6 +60,10 @@ namespace AstLab3.ViewModels
 
 		public ObservableCollection<Work> FinalTable { get; private set; } = new ObservableCollection<Work>();
 
+		public ObservableCollection<Work> WorksInCriticalPaths { get; private set; } = new ObservableCollection<Work>();
+
+		public ObservableCollection<Vertex> Vertices { get; private set; } = new ObservableCollection<Vertex>();
+
 		public Work SelectedWork { get; set; }
 
 		private string _title = "Title";
@@ -66,6 +74,9 @@ namespace AstLab3.ViewModels
 
 		private string _path = "";
 		public string Path { get => _path; set => Set(ref _path, value); }
+
+		private int _criticalPathLength = 0;
+		public int CriticalPathLength { get => _criticalPathLength; set => Set(ref _criticalPathLength, value); }
 		#endregion
 
 		#region Commands
@@ -218,6 +229,45 @@ namespace AstLab3.ViewModels
 			}
 		}
 		private bool CanClearFullPathsInGraphCommandExecute(object p) => FullPathsInTheGraph.Count > 0;
+		#endregion
+
+		#region ClearWorksInCriticalPathsCommand
+		public ICommand ClearWorksInCriticalPathsCommand { get; }
+		private void OnClearWorksInCriticalPathsCommandExecuted(object p)
+		{
+			try
+			{
+				WorksInCriticalPaths.Clear();
+				Status = "Список путей очищен";
+				_logger.LogMessage(Status);
+			}
+			catch (Exception e)
+			{
+				Status = e.Message;
+				_logger.LogMessage(Status);
+			}
+		}
+		private bool CanClearWorksInCriticalPathsCommandExecute(object p) => WorksInCriticalPaths.Count > 0;
+
+		#endregion
+
+		#region ClearVerticescParamsTableCommand
+		public ICommand ClearVerticescParamsTableCommand { get; }
+		private void OnClearVerticescParamsTableCommandExecuted(object p)
+		{
+			try
+			{
+				Vertices.Clear();
+				Status = "Таблица параметров событий очищена";
+				_logger.LogMessage(Status);
+			}
+			catch (Exception e)
+			{
+				Status = e.Message;
+				_logger.LogMessage(Status);
+			}
+		}
+		private bool CanClearVerticescParamsTableCommandExecute(object p) => Vertices.Count > 0;
 		#endregion
 
 		#endregion

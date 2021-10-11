@@ -44,5 +44,7 @@ namespace AstLab3.Models.NetworkSchedule
 			result.IndependentTimeReserve = IndependentTimeReserve;
 			return result;
 		}
+
+		public string Self => ToString();
 	}
 }
