@@ -278,7 +278,7 @@ namespace AstLab3.ViewModels
 							if (work.StartVertex == vertex || work.EndVertex == vertex)
 							{
 								toRemove.Add(work);
-								logMessage += $"\t\tУдалена работа: {work}";
+								logMessage += $"\t\tУдалена работа: {work}\r\n";
 							}
 						}
 					}
@@ -289,7 +289,7 @@ namespace AstLab3.ViewModels
 					foreach (Work work in _deletedWorks)
 					{
 						toRemove.Add(work);
-						logMessage += $"\tУдалена работа: {work}";
+						logMessage += $"\tУдалена работа: {work}\r\n";
 					}
 				}
 				foreach (var work in toRemove)
