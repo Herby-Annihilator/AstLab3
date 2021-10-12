@@ -12,11 +12,15 @@ namespace AstLab3.Models.Services.Data
 		public EditingMode EditingMode { get; set; }
 		public PreferedAction PreferedAction { get; set; }
 
-		public EditingWindowData(List<Vertex> vertices, EditingMode editingMode, PreferedAction preferedAction = PreferedAction.AddFakeVertex)
+		public string MeaningLine { get; set; }
+
+		public EditingWindowData(List<Vertex> vertices, EditingMode editingMode,
+			string meaningLine, PreferedAction preferedAction = PreferedAction.AddFakeVertex)
 		{
 			Vertices = vertices;
 			EditingMode = editingMode;
 			PreferedAction = preferedAction;
+			MeaningLine = meaningLine;
 		}
 	}
 

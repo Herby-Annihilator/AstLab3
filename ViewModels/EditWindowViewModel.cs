@@ -54,6 +54,7 @@ namespace AstLab3.ViewModels
 			else
 				DeletingEdgesIsNecessary = true;
 			EditingMode = editingWindowData.EditingMode;
+			MeaningLine = editingWindowData.MeaningLine;
 			PrepareVerticesDeleting();
 			PrepareEdgesDeleting();
 			ChoiceOfActionCommand = new LambdaCommand(OnChoiceOfActionCommandExecuted,
