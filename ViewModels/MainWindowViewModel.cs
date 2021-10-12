@@ -9,7 +9,7 @@ using System.Text;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.IO;
-using AstLab3.Models.NetworkSchedule;
+using AstLab3.Models.Schedules;
 using AstLab3.Models.Services;
 using AstLab3.Models.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
