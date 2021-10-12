@@ -24,5 +24,15 @@ namespace AstLab3.Models.Schedules
 			result.ReserveTime = ReserveTime;
 			return result;
 		}
+
+		public override bool Equals(object obj) => ((Vertex)obj).ID == this.ID;
+
+		public static bool operator ==(Vertex left, Vertex right) => left.Equals(right);
+
+		public static bool operator !=(Vertex left, Vertex right) => !left.Equals(right);
+
+		public override int GetHashCode() => ID;
+
+		public override string ToString() => base.ToString();
 	}
 }

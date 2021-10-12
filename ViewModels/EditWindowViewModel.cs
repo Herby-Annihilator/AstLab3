@@ -6,24 +6,54 @@ using AstLab3.Models.Schedules;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Runtime.CompilerServices;
+using AstLab3.Infrastructure.Commands;
+using AstLab3.Models.Services.Data;
 
 namespace AstLab3.ViewModels
 {
 	public class EditWindowViewModel : ViewModel
 	{
-		private Exchanger _exchanger;
+		private EditingWindowData _editingWindowData;
 
-		private AdjacencyList _adjacencyList;
+		private Dictionary<int, List<Work>> _adjacencyList;
+
+		private readonly Dictionary<string, object> _buffer = new Dictionary<string, object>();
+
+		protected bool SetValue(object value, [CallerMemberName] string propertyName = null)
+		{
+			if (_buffer.TryGetValue(propertyName, out var oldValue) && Equals(value, oldValue))
+				return false;
+
+			_buffer[propertyName] = value;
+			OnPropertyChanged(propertyName);
+			return true;
+		}
+
+		protected virtual T GetValue<T>(T oldValue, [CallerMemberName] string propertyName = null)
+		{
+			if (_buffer.TryGetValue(propertyName, out object value))
+				return (T)value;
+			return oldValue;
+		}
 
 		public EditingMode EditingMode { get; set; } = EditingMode.StartVertexMode;
 
 		private ILogger _logger;
 		private NetworkSchedule _networkSchedule;
 
-		public EditWindowViewModel(NetworkSchedule networkSchedule, ILogger logger)
+		public EditWindowViewModel(EditingWindowData editingWindowData, NetworkSchedule networkSchedule, ILogger logger)
 		{
 			_networkSchedule = networkSchedule;
 			_logger = logger;
+			_editingWindowData = editingWindowData;
+			if (editingWindowData.PreferedAction == PreferedAction.AddFakeVertex)
+				AddingFakeVertexIsNecessary = true;
+			else if (editingWindowData.PreferedAction == PreferedAction.DeleteVertices)
+				DeletingVerticesIsNecessary = true;
+			else
+				DeletingEdgesIsNecessary = true;
+			EditingMode = editingWindowData.EditingMode;
 			PrepareVerticesDeleting();
 			PrepareEdgesDeleting();
 			ChoiceOfActionCommand = new LambdaCommand(OnChoiceOfActionCommandExecuted,
@@ -40,13 +70,13 @@ namespace AstLab3.ViewModels
 
 		#region Properties
 
-		private string _title = "Редактироване вершин";
+		private string _title = "Редактирование вершин";
 		public string Title { get => _title; set => Set(ref _title, value); }
 
-		private string _status = "Редактироване вершин";
+		private string _status = "Редактирование вершин";
 		public string Status { get => _status; set => Set(ref _status, value); }
 
-		private string _meaningLine = "Редактироване вершин";
+		private string _meaningLine = "Редактирование вершин";
 		public string MeaningLine { get => _meaningLine; set => Set(ref _meaningLine, value); }
 
 		private string _fakeVertexIndex;
@@ -71,7 +101,7 @@ namespace AstLab3.ViewModels
 		}
 
 		private bool _deletingVerticesIsNecessary = false;
-		private List<int> _deletedVertices = new List<int>();
+		private List<Vertex> _deletedVertices = new List<Vertex>();
 		public bool DeletingVerticesIsNecessary
 		{
 			get => _deletingVerticesIsNecessary;
@@ -87,12 +117,12 @@ namespace AstLab3.ViewModels
 
 		private List<Work> _createdWorks = new List<Work>();
 
-		public ObservableCollection<int> VerticesCanBeDeleted { get; set; } =
-			new ObservableCollection<int>();
+		public ObservableCollection<Vertex> VerticesCanBeDeleted { get; set; } =
+			new ObservableCollection<Vertex>();
 
 		private bool _deletingCommandExecute = false;
-		private int _selectedVertexToDelete;
-		public int SelectedVertexToDelete
+		private Vertex _selectedVertexToDelete;
+		public Vertex SelectedVertexToDelete
 		{
 			get => _selectedVertexToDelete;
 			set
@@ -101,7 +131,7 @@ namespace AstLab3.ViewModels
 				AdjacencyEdgesWillBeDeleted.Clear();
 				_deletingCommandExecute = false;
 				List<Work> works;
-				if (!_adjacencyList.Edges.TryGetValue(_selectedVertexToDelete, out works))
+				if (!_adjacencyList.TryGetValue(_selectedVertexToDelete.ID, out works))
 					return;
 				_deletingCommandExecute = true;
 				foreach (Work work in works)
@@ -149,10 +179,10 @@ namespace AstLab3.ViewModels
 			try
 			{
 				int fakeIndex = Convert.ToInt32(FakeVertexIndex);
-				foreach (int vertex in _exchanger.Vertices)
+				foreach (var vertex in _editingWindowData.Vertices)
 				{
-					if (vertex == fakeIndex)
-						throw new Exception($"Вершина {vertex} уже существует");
+					if (vertex.ID == fakeIndex)
+						throw new Exception($"Вершина {vertex.ID} уже существует");
 				}
 				string[] buffer = IndexesToConnectWithFakeVertex.Split(' ',
 					StringSplitOptions.RemoveEmptyEntries);
@@ -183,7 +213,7 @@ namespace AstLab3.ViewModels
 				VerticesCanBeDeleted.Remove(SelectedVertexToDelete);
 				AdjacencyEdgesWillBeDeleted.Clear();
 				_deletingCommandExecute = false;
-				Status = $"Вершина {SelectedVertexToDelete} удалена. Чтобы изменения вступили в силу, нажмите 'OK'";
+				Status = $"Вершина {SelectedVertexToDelete.ID} удалена. Чтобы изменения вступили в силу, нажмите 'OK'";
 			}
 			catch (Exception e)
 			{
@@ -221,37 +251,52 @@ namespace AstLab3.ViewModels
 			try
 			{
 				List<Work> toRemove = new List<Work>();
+				string logMessage = "";
 				if (AddingFakeVertexIsNecessary)
 				{
 					if (EditingMode == EditingMode.StartVertexMode)
-						_exchanger.CurrentTable.InsertRange(0, _createdWorks);
+					{
+						_networkSchedule.Table.InsertRange(0, _createdWorks);
+						_logger.LogMessage($"Добавлена начальная вершина с индексом: {_networkSchedule.Table[0].StartVertex.ID}");
+					}
 					else
-						_exchanger.CurrentTable.AddRange(_createdWorks);
+					{
+						_networkSchedule.Table.AddRange(_createdWorks);
+						_logger.LogMessage($"Добавлена конечная вершина с индексом:" +
+							$" {_networkSchedule.Table[_networkSchedule.Table.Count].EndVertex.ID}");
+					}
 				}
 				else if (DeletingVerticesIsNecessary)
 				{
-
-					foreach (int vertex in _deletedVertices)
+					logMessage += "Удаление вершин\r\n";
+					foreach (var vertex in _deletedVertices)
 					{
-						foreach (Work work in _exchanger.CurrentTable)
+						logMessage += $"\tУдаление вершины {vertex.ID}:\r\n";
+						foreach (Work work in _networkSchedule.Table)
 						{
-							if (work.FirstEventID == vertex || work.SecondEventID == vertex)
+							if (work.StartVertex == vertex || work.EndVertex == vertex)
+							{
 								toRemove.Add(work);
+								logMessage += $"\t\tУдалена работа: {work}";
+							}
 						}
 					}
 				}
 				else if (DeletingEdgesIsNecessary)
 				{
+					logMessage += "Удаление работ\r\n";
 					foreach (Work work in _deletedWorks)
 					{
 						toRemove.Add(work);
+						logMessage += $"\tУдалена работа: {work}";
 					}
 				}
 				foreach (var work in toRemove)
 				{
-					_exchanger.CurrentTable.Remove(work);
+					_networkSchedule.Table.Remove(work);
 				}
-				Status = "Изменения применены.";
+				_logger.LogMessage(logMessage);
+				_logger.LogMessage("Изменения применены.");
 				App.ActivedWindow.Close();
 			}
 			catch (Exception e)
@@ -270,7 +315,7 @@ namespace AstLab3.ViewModels
 			if (indexes[0] == fakeVertexIndex)
 				throw new Exception($"Попытка соединить врешину {fakeVertexIndex} и" +
 					$" {indexes[0]} недопустима");
-			if (!_exchanger.Vertices.Contains(indexes[0]))
+			if (!_editingWindowData.Vertices.Contains(_networkSchedule.GetVertexById(indexes[0])))
 				throw new Exception($"Вершина {indexes[0]} не существует " +
 					$"в исходной таблице");
 			for (int i = 0; i < indexes.Length - 1; i++)
@@ -281,7 +326,7 @@ namespace AstLab3.ViewModels
 				else if (indexes[i + 1] == fakeVertexIndex)
 					throw new Exception($"Попытка соединить врешину {fakeVertexIndex} и" +
 						$" {indexes[i + 1]} недопустима");
-				else if (!_exchanger.Vertices.Contains(indexes[i + 1]))
+				else if (!_editingWindowData.Vertices.Contains(_networkSchedule.GetVertexById(indexes[i + 1])))
 					throw new Exception($"Вершина {indexes[i + 1]} не существует " +
 						$"в исходной таблице");
 			}
@@ -294,14 +339,16 @@ namespace AstLab3.ViewModels
 			{
 				for (int i = 0; i < indexes.Length; i++)
 				{
-					_createdWorks.Add(new Work(fakeVertexIndex, indexes[i], 0));
+					_createdWorks.Add(new Work(_networkSchedule.GetVertexById(fakeVertexIndex),
+						_networkSchedule.GetVertexById(indexes[i]), 0));
 				}
 			}
 			else
 			{
 				for (int i = 0; i < indexes.Length; i++)
 				{
-					_createdWorks.Add(new Work(indexes[i], fakeVertexIndex, 0));
+					_createdWorks.Add(new Work(_networkSchedule.GetVertexById(indexes[i]),
+						_networkSchedule.GetVertexById(fakeVertexIndex), 0));
 				}
 			}
 		}
@@ -310,33 +357,29 @@ namespace AstLab3.ViewModels
 		{
 			VerticesCanBeDeleted.Clear();
 			AdjacencyEdgesWillBeDeleted.Clear();
-			_adjacencyList = new AdjacencyList();
+			_adjacencyList = new Dictionary<int, List<Work>>();
 			List<Work> works;
-			foreach (var vertex in _exchanger.Vertices)
+			foreach (var vertex in _editingWindowData.Vertices)
 			{
 				VerticesCanBeDeleted.Add(vertex);
-				_adjacencyList.Vertices.Add(vertex);
 				works = new List<Work>();
-				foreach (Work work in _exchanger.CurrentTable)
+				foreach (Work work in _networkSchedule.Table)
 				{
-					if (work.FirstEventID == vertex || work.SecondEventID == vertex)
+					if (work.StartVertex == vertex || work.EndVertex == vertex)
 						works.Add(work);
 				}
-				_adjacencyList.Edges.Add(vertex, works);
+				_adjacencyList.Add(vertex.ID, works);
 			}
-
-			SelectedVertexToDelete = VerticesCanBeDeleted.Count > 0 ? VerticesCanBeDeleted[0] :
-				0;
 		}
 
 		private void PrepareEdgesDeleting()
 		{
 			WorksThatCanBeDeleted.Clear();
-			foreach (int vertex in _exchanger.Vertices)
+			foreach (var vertex in _editingWindowData.Vertices)
 			{
-				foreach (Work work in _exchanger.CurrentTable)
+				foreach (Work work in _networkSchedule.Table)
 				{
-					if (work.FirstEventID == vertex || work.SecondEventID == vertex)
+					if (work.StartVertex.ID == vertex.ID || work.EndVertex.ID == vertex.ID)
 						WorksThatCanBeDeleted.Add(work);
 				}
 			}

@@ -9,6 +9,16 @@ namespace AstLab3.Models.Schedules
 		public List<Work> Table { get; private set; }
 		public List<Vertex> Vertices { get; private set; }
 
+		public Vertex GetVertexById(int id)
+		{
+			foreach (var item in Vertices)
+			{
+				if (id == item.ID)
+					return item;
+			}
+			return null;
+		}
+
 		public NetworkSchedule(ICollection<Work> works)
 		{
 			Table = new List<Work>();
