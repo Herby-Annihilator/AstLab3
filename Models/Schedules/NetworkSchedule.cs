@@ -1,5 +1,7 @@
-﻿using System;
+﻿using AstLab3.Models.Services.Interfaces;
+using System;
 using System.Collections.Generic;
+using AstLab3.Models.Schedules.Exceptions;
 using System.Text;
 
 namespace AstLab3.Models.Schedules
@@ -42,6 +44,60 @@ namespace AstLab3.Models.Schedules
 			return result;
 		}
 
+		private void CopySourceTableToWorkingTable(ICollection<Work> source, ICollection<Work> working)
+		{
+			foreach (Work work in source)
+			{
+				working.Add(work.Clone());
+			}
+		}
 
+		private int SortAscending(Work first, Work second)
+		{
+			if (first.StartVertex > second.StartVertex) return 1;
+			if (first.StartVertex < second.StartVertex) return -1;
+			if (first.StartVertex == second.StartVertex)
+			{
+				if (first.EndVertex > second.EndVertex) return 1;
+				if (first.EndVertex < second.EndVertex) return -1;
+			}
+			return 0;
+		}
+
+		private void RemoveRepeatedWorksFromTable(List<Work> works, ILogger logger = null)
+		{
+			List<Work> toRemove = new List<Work>();
+			Work prevWork = null;
+			foreach (Work work in works)
+			{
+				if (prevWork == null)
+				{
+					prevWork = work;
+					continue;
+				}
+				if (prevWork.StartVertex == work.StartVertex)
+				{
+					if (prevWork.EndVertex == work.EndVertex)
+					{
+						if (prevWork.Length == work.Length)  // полное совпадение
+						{
+							toRemove.Add(work);
+						}
+						else // частичное совпадение - нужно вмешательство пользователя
+						{
+							throw new OverlappingWorksFoundException("Частичное совпадение - нужно вмешательство пользователя",
+								prevWork,
+								work);
+						}
+					}
+				}
+				prevWork = work;
+			}
+			foreach (var work in toRemove)
+			{
+				works.Remove(work);
+				logger?.LogMessage($"Работа {work} удалена из-за полного повтора");
+			}
+		}
 	}
 }

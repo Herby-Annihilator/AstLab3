@@ -34,5 +34,13 @@ namespace AstLab3.Models.Schedules
 		public override int GetHashCode() => ID;
 
 		public override string ToString() => base.ToString();
+
+		public static bool operator <(Vertex left, Vertex right) => left.ID < right.ID;
+
+		public static bool operator >(Vertex left, Vertex right) => left.ID > right.ID;
+
+		public static bool operator <=(Vertex left, Vertex right) => left.ID <= right.ID;
+
+		public static bool operator >=(Vertex left, Vertex right) => left.ID >= right.ID;
 	}
 }
