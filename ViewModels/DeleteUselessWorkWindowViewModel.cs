@@ -17,7 +17,10 @@ namespace AstLab3.ViewModels
 		//
 		// нужен только для дизайнера
 		//
-		public DeleteUselessWorkWindowViewModel() : this(new DeleteUselessWorkWindowData(null, null), new NetworkSchedule(null), null) { }
+		public DeleteUselessWorkWindowViewModel()
+		{
+
+		}
 		public DeleteUselessWorkWindowViewModel(DeleteUselessWorkWindowData deleteUselessWorkWindowData, NetworkSchedule toEidt, ILogger logger)
 		{
 			_logger = logger;
@@ -74,6 +77,7 @@ namespace AstLab3.ViewModels
 				}
 			}
 			OnCloseWindow(new UserDialogEventArgs(result));
+			_logger.LogMessage("Окно удаления частично повторяющихся работ закрыто.");
 		}
 		private bool CanDeleteCommandExecute(object p) => true;
 
@@ -81,7 +85,7 @@ namespace AstLab3.ViewModels
 		public ICommand CancelCommand { get; }
 		private void OnCancelCommandExecuted(object p)
 		{
-			_logger.LogMessage("Пользователь не удалил ни одну из работ");
+			_logger.LogMessage("Пользователь не удалил ни одну из частично повторяющихся работ. Окно закрыто.");
 			OnCloseWindow(new UserDialogEventArgs(false));
 		}
 		private bool CanCancelCommandExecute(object p) => true;
