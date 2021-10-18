@@ -1,0 +1,36 @@
+﻿<Window x:Class="AstLab3.Views.Windows.DeleteUselessWorkWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:AstLab3.ViewModels"
+        xmlns:local="clr-namespace:AstLab3.Views.Windows"
+        mc:Ignorable="d"
+        Title="DeleteUselessWorkWindow" Height="450" Width="800"
+        d:DataContext="{d:DesignInstance vm:DeleteUselessWorkWindowViewModel, IsDesignTimeCreatable=True}"
+        >
+    <DockPanel>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right"
+                    Margin="5">
+            <Button Content="Отмена" Width="75" IsCancel="True" Command="{Binding CancelCommand}"/>
+            <Button Content="Удалить" Width="75" Margin="5, 0" IsDefault="True" IsCancel="True"
+                    Command="{Binding DeleteCommand}"
+                    />
+        </StackPanel>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="Обнауржены две похожие работы. Какую удалить?" Margin="5"/>
+            <UniformGrid Grid.Row="1" Margin="5" Rows="2">
+                <RadioButton IsChecked="{Binding DeleteFirstWorkIsNecessary}" VerticalAlignment="Center"
+                             Content="{Binding FirstWorkToDelete}"
+                             Command="{Binding SelectWorkToDeleteCommand}" CommandParameter="first"/>
+                <RadioButton IsChecked="{Binding DeleteSecondWorkIsNecessary}" VerticalAlignment="Center"
+                             Content="{Binding SecondWorkToDelete}"
+                             Command="{Binding SelectWorkToDeleteCommand}" CommandParameter="second"/>
+            </UniformGrid>
+        </Grid>
+    </DockPanel>
+</Window>
