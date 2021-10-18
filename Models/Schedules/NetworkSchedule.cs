@@ -336,5 +336,91 @@ namespace AstLab3.Models.Schedules
 			Table = Streamline(Table, startVertex.ID);
 			DFS(Table, 0, startVertex.ID, endVertex.ID, currentPath, toDoWithEqualVertices);
 		}
+
+		#region CalculateVerticesParameters
+		public void CalculateVerticesParameters()
+		{
+			FirstStep();
+			SecondStep();
+		}
+		private void FirstStep()
+		{
+			Table[0].StartVertex.EarlyCompletionDate = 0;
+			List<Vertex> processedVertices = new List<Vertex>();
+			processedVertices.Add(Table[0].StartVertex);
+			int earlyCompletionDate;
+			foreach (Work work in Table)
+			{
+				if (!processedVertices.Contains(work.EndVertex))
+				{
+					processedVertices.Add(work.EndVertex);
+				}
+				earlyCompletionDate = work.StartVertex.EarlyCompletionDate + work.Length;
+				if (work.EndVertex.EarlyCompletionDate < earlyCompletionDate)
+				{
+					work.EndVertex.EarlyCompletionDate = earlyCompletionDate;
+					UpdateProcessedVertices(processedVertices, work.EndVertex);
+				}
+			}
+		}
+		private void UpdateProcessedVertices(List<Vertex> processedVertices, Vertex previousVertex)
+		{
+			if (!processedVertices.Contains(previousVertex))
+				return;
+			foreach (var item in Table)
+			{
+				if (item.StartVertex == previousVertex)
+				{
+					if (processedVertices.Contains(item.EndVertex))
+					{
+						if (item.EndVertex.EarlyCompletionDate < previousVertex.EarlyCompletionDate + item.Length)
+						{
+							item.EndVertex.EarlyCompletionDate = previousVertex.EarlyCompletionDate + item.Length;
+							UpdateProcessedVertices(processedVertices, item.EndVertex);
+						}
+					}
+				}
+			}
+		}
+		private void SecondStep()
+		{
+			int lastIndex = Table.Count - 1, lateCompletionDate;
+			Table[lastIndex].EndVertex.LateCompletionDate = Table[lastIndex].EndVertex.EarlyCompletionDate;
+			List<Vertex> processedVertices = new List<Vertex>();
+			processedVertices.Add(Table[lastIndex].EndVertex);
+			for (int i = lastIndex; i >= 0; i--)
+			{
+				if (!processedVertices.Contains(Table[i].StartVertex))
+				{
+					processedVertices.Add(Table[i].StartVertex);
+				}
+				lateCompletionDate = Table[i].EndVertex.LateCompletionDate - Table[i].Length;
+				if (Table[i].StartVertex.LateCompletionDate > lateCompletionDate)
+				{
+					Table[i].StartVertex.LateCompletionDate = lateCompletionDate;
+					UpdateProcessedVerticesOnSecondStep(processedVertices, Table[i].StartVertex);
+				}
+			}
+		}
+		private void UpdateProcessedVerticesOnSecondStep(List<Vertex> processedVertices, Vertex nextVertex)
+		{
+			if (!processedVertices.Contains(nextVertex))
+				return;
+			foreach (var item in Table)
+			{
+				if (item.EndVertex == nextVertex)
+				{
+					if (processedVertices.Contains(item.StartVertex))
+					{
+						if (item.StartVertex.LateCompletionDate > nextVertex.LateCompletionDate - item.Length)
+						{
+							item.StartVertex.LateCompletionDate = nextVertex.LateCompletionDate - item.Length;
+							UpdateProcessedVerticesOnSecondStep(processedVertices, item.StartVertex);
+						}
+					}
+				}
+			}
+		}
+		#endregion
 	}
 }
