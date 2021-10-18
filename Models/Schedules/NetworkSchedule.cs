@@ -342,6 +342,8 @@ namespace AstLab3.Models.Schedules
 		{
 			FirstStep();
 			SecondStep();
+			if (Table[0].StartVertex.LateCompletionDate != 0)
+				throw new Exception("Позднее время наступления начального события != 0");
 		}
 		private void FirstStep()
 		{

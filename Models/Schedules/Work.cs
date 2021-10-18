@@ -11,16 +11,16 @@ namespace AstLab3.Models.Schedules
 
 		public int Length { get; set; }
 
-		public int EarlyStartDate { get; set; }
-		public int LateStartDate { get; set; }
-		public int EarlyEndDate { get; set; }
+		public int EarlyStartDate => StartVertex.EarlyCompletionDate;
+		public int LateStartDate => EndVertex.LateCompletionDate - Length;
+		public int EarlyEndDate => StartVertex.EarlyCompletionDate + Length;
 
-		public int LateEndDate { get; set; }
+		public int LateEndDate => EndVertex.LateCompletionDate;
 
-		public int FullTimeReserve { get; set; }
+		public int FullTimeReserve => EndVertex.LateCompletionDate - StartVertex.EarlyCompletionDate - Length;
 		public int PrivateTimeReserve { get; set; }
 		public int FreeTimeReserve { get; set; }
-		public int IndependentTimeReserve { get; set; }
+		public int IndependentTimeReserve => EndVertex.EarlyCompletionDate - StartVertex.LateCompletionDate - Length;
 
 		public Work(Vertex startVertex, Vertex endVertex, int length)
 		{
@@ -34,14 +34,8 @@ namespace AstLab3.Models.Schedules
 		internal Work Clone()
 		{
 			Work result = new Work(StartVertex.Clone(), EndVertex.Clone(), Length);
-			result.EarlyStartDate = EarlyStartDate;
-			result.EarlyEndDate = EarlyEndDate;
-			result.LateStartDate = LateStartDate;
-			result.LateEndDate = LateEndDate;
-			result.FullTimeReserve = FullTimeReserve;
 			result.PrivateTimeReserve = PrivateTimeReserve;
 			result.FreeTimeReserve = FreeTimeReserve;
-			result.IndependentTimeReserve = IndependentTimeReserve;
 			return result;
 		}
 

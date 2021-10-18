@@ -9,7 +9,7 @@ namespace AstLab3.Models.Schedules
 		public int ID { get; set; }
 		public int EarlyCompletionDate { get; set; }
 		public int LateCompletionDate { get; set; }
-		public int ReserveTime { get; set; }
+		public int ReserveTime => LateCompletionDate - EarlyCompletionDate;
 
 		public Vertex(int id)
 		{
@@ -21,7 +21,6 @@ namespace AstLab3.Models.Schedules
 			Vertex result = new Vertex(ID);
 			result.EarlyCompletionDate = EarlyCompletionDate;
 			result.LateCompletionDate = LateCompletionDate;
-			result.ReserveTime = ReserveTime;
 			return result;
 		}
 
