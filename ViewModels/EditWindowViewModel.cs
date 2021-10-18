@@ -12,7 +12,7 @@ using AstLab3.Models.Services.Data;
 
 namespace AstLab3.ViewModels
 {
-	public class EditWindowViewModel : ViewModel
+	public class EditWindowViewModel : ClosableViewModel
 	{
 		private EditingWindowData _editingWindowData;
 
