@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using AstLab3.Models.Schedules.Exceptions;
 using System.Text;
+using AstLab3.ViewModels;
 
 namespace AstLab3.Models.Schedules
 {
@@ -98,6 +99,49 @@ namespace AstLab3.Models.Schedules
 				works.Remove(work);
 				logger?.LogMessage($"Работа {work} удалена из-за полного повтора");
 			}
+		}
+
+		private Vertex FindStartVertex(List<Work> works)
+		{
+			List<Vertex> vertecies = GetVerticesList(works);
+			List<Vertex> startVertecies = new List<Vertex>();
+			foreach (var vertex in vertecies)
+			{
+				if (VerterxHasNoInsideEdges(works, vertex.ID))
+				{
+					startVertecies.Add(vertex);
+				}
+			}
+			if (startVertecies.Count > 1)
+			{
+				throw new SeveralVerticesFoundException("Найдено несколько " +
+					"начальных вершин", startVertecies, EditingMode.StartVertexMode);
+			}
+			else if (startVertecies.Count == 0)
+			{
+				throw new NoVerticesFoundException("Не найдено начальных вершин", EditingMode.StartVertexMode);
+			}
+			return startVertecies[0];
+		}
+
+		private bool VertexHasNoOutsideEdges(List<Work> edges, int vertexID)
+		{
+			foreach (Work work in edges)
+			{
+				if (work.StartVertex.ID == vertexID)
+					return false;
+			}
+			return true;
+		}
+
+		private bool VerterxHasNoInsideEdges(List<Work> edges, int vertexID)
+		{
+			foreach (Work edge in edges)
+			{
+				if (edge.EndVertex.ID == vertexID)
+					return false;
+			}
+			return true;
 		}
 	}
 }
