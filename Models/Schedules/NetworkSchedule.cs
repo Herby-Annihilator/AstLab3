@@ -10,7 +10,7 @@ namespace AstLab3.Models.Schedules
 	public class NetworkSchedule
 	{
 		public List<Work> Table { get; private set; }
-		public List<Vertex> Vertices { get; private set; }
+		public List<Vertex> Vertices { get => GetVerticesList(Table); }
 
 		public Vertex GetVertexById(int id)
 		{
@@ -29,7 +29,6 @@ namespace AstLab3.Models.Schedules
 			{
 				Table.Add(item.Clone());
 			}
-			Vertices = GetVerticesList(Table);
 		}
 
 		private List<Vertex> GetVerticesList(List<Work> table)
@@ -124,6 +123,22 @@ namespace AstLab3.Models.Schedules
 			return startVertecies[0];
 		}
 
+		private Vertex FindEndVertex(List<Work> source)
+		{
+			List<Vertex> vertices = GetVerticesList(source);
+			List<Vertex> endVertices = new List<Vertex>();
+			foreach (var vertex in vertices)
+			{
+				if (VertexHasNoOutsideEdges(source, vertex.ID))
+					endVertices.Add(vertex);
+			}
+			if (endVertices.Count > 1)
+				throw new SeveralVerticesFoundException("Найдено несколько конечных вершин", endVertices, EditingMode.EndVertexMode);
+			else if (endVertices.Count == 0)
+				throw new NoVerticesFoundException("Конечных вершин не найдено", EditingMode.EndVertexMode);
+			return endVertices[0];
+		}
+
 		private bool VertexHasNoOutsideEdges(List<Work> edges, int vertexID)
 		{
 			foreach (Work work in edges)
@@ -142,6 +157,183 @@ namespace AstLab3.Models.Schedules
 					return false;
 			}
 			return true;
+		}
+
+		private void DFS(List<Work> table, int blockStartIndex, int currentVertex, int endVertex, List<int> currentPath, Action action)
+		{
+			currentPath.Add(currentVertex);
+			if (currentVertex == endVertex)
+			{
+				action?.Invoke();
+				currentPath.Remove(currentVertex);
+				return;
+			}
+			int blockEndIndex = blockStartIndex + 1;
+			for (; blockEndIndex < table.Count; blockEndIndex++) // поиск конца блока работ
+			{
+				if (table[blockEndIndex].StartVertex.ID != table[blockStartIndex].StartVertex.ID)
+				{
+					break;
+				}
+			}
+			int nextBlockIndex;
+			for (int i = blockStartIndex; i < blockEndIndex && i < table.Count; i++) // обход блока работ
+			{
+				// найти блок, к которому принадлежит следующее событие
+				for (nextBlockIndex = 0; nextBlockIndex < table.Count; nextBlockIndex++)
+				{
+					if (table[nextBlockIndex].StartVertex.ID == table[i].EndVertex.ID)
+						break;
+				}
+				DFS(table, nextBlockIndex, table[i].EndVertex.ID, endVertex, currentPath, action);
+			}
+			currentPath.Remove(currentVertex);
+			return;
+		}
+
+		private List<Work> Streamline(List<Work> source, int startVertex)
+		{
+			List<int> processedVerticies = new List<int>();
+			List<Work> works = new List<Work>();
+			CopySourceTableToWorkingTable(source, works);
+			//
+			// найти начальную вершину в таблице и переместить все работы в начало
+			//
+			MoveStartWorksToTheBegining(works, startVertex);
+			List<Work> result = new List<Work>();
+			Queue<int> toProcess = new Queue<int>(source.Count / 2);
+			toProcess.Enqueue(works[0].StartVertex.ID);
+			int currentVertex;
+			List<Work> toRemove = new List<Work>();
+			while (toProcess.Count > 0)
+			{
+				currentVertex = toProcess.Dequeue();
+				foreach (Work work in works)
+				{
+					if (work.StartVertex.ID == currentVertex)
+					{
+						if (!processedVerticies.Contains(work.EndVertex.ID))
+						{
+							toProcess.Enqueue(work.EndVertex.ID);
+						}
+						result.Add(work);
+						toRemove.Add(work);
+					}
+				}
+				foreach (var item in toRemove)
+				{
+					works.Remove(item);
+				}
+				toRemove.Clear();
+			}
+			return result;
+		}
+
+		private void MoveStartWorksToTheBegining(List<Work> source, int startVertex)
+		{
+			List<Work> buffer = new List<Work>();
+			foreach (Work work in source)
+			{
+				if (work.StartVertex.ID == startVertex)
+				{
+					buffer.Add(work);
+				}
+			}
+			foreach (Work work in buffer)
+			{
+				source.Remove(work);
+			}
+			source.InsertRange(0, buffer);
+		}
+
+		private void RemoveEdgesWithSpecifiedVertex(List<Work> works, int vertexID)
+		{
+			List<Work> toRemove = new List<Work>();
+			foreach (Work work in works)
+			{
+				if (work.StartVertex.ID == vertexID || work.EndVertex.ID == vertexID)
+					toRemove.Add(work);
+			}
+			foreach (Work work in toRemove)
+			{
+				works.Remove(work);
+			}
+		}
+
+		private void FindCycles(List<Work> works)
+		{
+			List<int> vertecies = new List<int>();
+			foreach (Work work in works)
+			{
+				if (!vertecies.Contains(work.StartVertex.ID))
+					vertecies.Add(work.StartVertex.ID);
+				if (!vertecies.Contains(work.EndVertex.ID))
+					vertecies.Add(work.EndVertex.ID);
+			}
+			List<Work> edges = new List<Work>();
+			CopySourceTableToWorkingTable(works, edges);
+			int currentVertex;
+			int currentVertexIndex = 0;
+			while (currentVertexIndex < vertecies.Count)
+			{
+				currentVertex = vertecies[currentVertexIndex];
+				currentVertexIndex++;
+				if (VertexHasNoOutsideEdges(edges, currentVertex)
+					|| VerterxHasNoInsideEdges(edges, currentVertex))
+				{
+					RemoveEdgesWithSpecifiedVertex(edges, currentVertex);
+					vertecies.Remove(currentVertex);
+					currentVertexIndex = 0;
+				}
+			}
+			if (edges.Count > 0)
+				throw new CyclesFoundException("Найден(ы) цикл(ы)", edges);
+		}
+
+		private void RemoveLoops(List<Work> works, ILogger logger = null)
+		{
+			List<Work> toRemove = new List<Work>();
+			foreach (Work work in works)
+			{
+				if (work.StartVertex.ID == work.EndVertex.ID)
+				{
+					toRemove.Add(work);
+				}
+			}
+			foreach (Work work in toRemove)
+			{
+				works.Remove(work);
+				logger?.LogMessage($"Петля {work.StartVertex.ID} → {work.EndVertex.ID} удалена");
+			}
+		}
+
+		public void Streamline(ILogger logger = null)
+		{
+			Vertex startVertex;
+			Vertex endVertex;
+
+			Table.Sort(SortAscending);
+			RemoveLoops(Table, logger);
+			RemoveRepeatedWorksFromTable(Table, logger);
+			startVertex = FindStartVertex(Table);
+			endVertex = FindEndVertex(Table);
+			FindCycles(Table);
+			Table = Streamline(Table, startVertex.ID);
+		}
+
+		public void FindAllPaths(Action toDoWithEqualVertices, ILogger logger = null)
+		{
+			Vertex startVertex;
+			Vertex endVertex;
+
+			Table.Sort(SortAscending);
+			RemoveLoops(Table, logger);
+			RemoveRepeatedWorksFromTable(Table, logger);
+			startVertex = FindStartVertex(Table);
+			endVertex = FindEndVertex(Table);
+			FindCycles(Table);
+			Table = Streamline(Table, startVertex.ID);
+			DFS(Table, 0, startVertex.ID, endVertex.ID, new List<int>(), toDoWithEqualVertices);
 		}
 	}
 }
