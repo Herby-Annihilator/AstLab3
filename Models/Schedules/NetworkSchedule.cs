@@ -159,12 +159,13 @@ namespace AstLab3.Models.Schedules
 			return true;
 		}
 
-		private void DFS(List<Work> table, int blockStartIndex, int currentVertex, int endVertex, List<int> currentPath, Action action)
+		private void DFS(List<Work> table, int blockStartIndex, int currentVertex, int endVertex, List<int> currentPath,
+			Action<List<int>, int> action)
 		{
 			currentPath.Add(currentVertex);
 			if (currentVertex == endVertex)
 			{
-				action?.Invoke();
+				action?.Invoke(currentPath, currentVertex);
 				currentPath.Remove(currentVertex);
 				return;
 			}
@@ -321,7 +322,7 @@ namespace AstLab3.Models.Schedules
 			Table = Streamline(Table, startVertex.ID);
 		}
 
-		public void FindAllPaths(Action toDoWithEqualVertices, ILogger logger = null)
+		public void FindAllPaths(Action<List<int>, int> toDoWithEqualVertices, List<int> currentPath, ILogger logger = null)
 		{
 			Vertex startVertex;
 			Vertex endVertex;
@@ -333,7 +334,7 @@ namespace AstLab3.Models.Schedules
 			endVertex = FindEndVertex(Table);
 			FindCycles(Table);
 			Table = Streamline(Table, startVertex.ID);
-			DFS(Table, 0, startVertex.ID, endVertex.ID, new List<int>(), toDoWithEqualVertices);
+			DFS(Table, 0, startVertex.ID, endVertex.ID, currentPath, toDoWithEqualVertices);
 		}
 	}
 }

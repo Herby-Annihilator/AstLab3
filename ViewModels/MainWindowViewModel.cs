@@ -13,6 +13,8 @@ using AstLab3.Models.Schedules;
 using AstLab3.Models.Services;
 using AstLab3.Models.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using AstLab3.Models.Schedules.Exceptions;
+using AstLab3.Models.Services.Data;
 
 namespace AstLab3.ViewModels
 {
@@ -20,6 +22,7 @@ namespace AstLab3.ViewModels
 	public class MainWindowViewModel : ViewModel
 	{
 		private ILogger _logger;
+		private NetworkSchedule _networkSchedule;
 
 		public MainWindowViewModel()
 		{
@@ -37,6 +40,7 @@ namespace AstLab3.ViewModels
 				CanClearWorksInCriticalPathsCommandExecute);
 			ClearVerticescParamsTableCommand = new LambdaCommand(OnClearVerticescParamsTableCommandExecuted, 
 				CanClearVerticescParamsTableCommandExecute);
+			StreamlineCommand = new LambdaCommand(OnStreamlineCommandExecuted, CanStreamlineCommandExecute);
 		}
 
 		private void LogMessageToLogFile(object sender, LoggerEventArgs e)
@@ -175,7 +179,8 @@ namespace AstLab3.ViewModels
 				{
 					SourceTable.Clear();
 					LoadSourceTable(Path);
-					Status = "Таблица перезагружена";
+					_networkSchedule = new NetworkSchedule(SourceTable);
+					Status = "Таблица перезагружена. Сетевой график по таблице инициализирован.";
 					_logger.LogMessage(Status);
 				}
 				else
@@ -270,6 +275,58 @@ namespace AstLab3.ViewModels
 		private bool CanClearVerticescParamsTableCommandExecute(object p) => Vertices.Count > 0;
 		#endregion
 
+		#region StreamlineCommand
+		public ICommand StreamlineCommand { get; }
+		private void OnStreamlineCommandExecuted(object p)
+		{
+			try
+			{
+				bool isNetworkScheduleStreamlined = false;
+				while (!isNetworkScheduleStreamlined)
+				{
+					try
+					{
+						_logger.LogMessage("Старт процедуры 'частичного упорядочивания'");
+						_networkSchedule.FindAllPaths(AddVertexToFullPaths, new List<int>(), _logger);
+						isNetworkScheduleStreamlined = true;
+					}
+					catch (CyclesFoundException e)
+					{
+						DeleteWorksInCycleWindowData data = new DeleteWorksInCycleWindowData(e.WorksInCycle);
+						UserDialogDeleteWorksInCycleWindow dialog = new UserDialogDeleteWorksInCycleWindow(_logger, data);
+						dialog.Edit(_networkSchedule);
+					}
+					catch (SeveralVerticesFoundException e)
+					{
+						EditingWindowData data = new EditingWindowData(e.Vertices, e.EditingMode, e.Message);
+						UserDialogEditingWindow dialog = new UserDialogEditingWindow(data, _logger);
+						dialog.Edit(_networkSchedule);
+					}
+					catch (NoVerticesFoundException e)
+					{
+						EditingWindowData data = new EditingWindowData(new List<Vertex>(), e.EditingMode, e.Message);
+						UserDialogEditingWindow dialog = new UserDialogEditingWindow(data, _logger);
+						dialog.Edit(_networkSchedule);
+					}
+					catch (OverlappingWorksFoundException e)
+					{
+						DeleteUselessWorkWindowData data = new DeleteUselessWorkWindowData(e.FirstWorkToDelete, e.SecondWorkToDelete);
+						UserDialogDeleteUselessWorkWindow dialog = new UserDialogDeleteUselessWorkWindow(_logger, data);
+						dialog.Edit(_networkSchedule);
+					}
+				}
+				Status = "Упорядочивание прошло успешно";
+				_logger.LogMessage(Status);
+			}
+			catch (Exception e)
+			{
+				Status = e.Message;
+				_logger.LogMessage(Status);
+			}
+		}
+		private bool CanStreamlineCommandExecute(object p) => SourceTable.Count > 0;
+		#endregion
+
 		#endregion
 
 		private void LoadSourceTable(string fileName)  //  формат файла: число число число
@@ -290,6 +347,16 @@ namespace AstLab3.ViewModels
 				}
 			}
 			reader.Close();
+		}
+
+		private void AddVertexToFullPaths(List<int> currentPath, int vertexIndex)
+		{
+			string path = "";
+			foreach (int vertex in currentPath)
+			{
+				path += vertex.ToString() + " ";
+			}
+			FullPathsInTheGraph.Add(path);
 		}
 	}
 }
