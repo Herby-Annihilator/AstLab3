@@ -1,0 +1,43 @@
+﻿<Window x:Class="AstLab3.Views.Windows.DeleteWorksInCycleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:AstLab3.ViewModels"
+        xmlns:local="clr-namespace:AstLab3.Views.Windows"
+        mc:Ignorable="d"
+        Title="DeleteWorksInCycleWindow" Height="450" Width="800"
+        d:DataContext="{d:DesignInstance vm:DeleteWorksInCycleWindowViewModel, IsDesignTimeCreatable=True}"
+        >
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Center">
+            <StackPanel.Resources>
+                <Style TargetType="TextBlock">
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                    <Setter Property="Margin" Value="3"/>
+                </Style>
+            </StackPanel.Resources>
+            <TextBlock Text="Найден(ы) цикл(ы)"/>
+            <TextBlock Text="В состав цикла(ов) входят следующие работы"/>
+        </StackPanel>
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Margin" Value="3"/>
+                    <Setter Property="Padding" Value="5,1"/>
+                </Style>
+            </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Удалите одну или несколько работ, чтобы избавиться от цикла(ов)" Margin="3"/>
+            <Button Content="Отмена" HorizontalAlignment="Left" Grid.Row="1" Command="{Binding CancelCommand}"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="1">
+                <Button Content="Удалить выбранную" Command="{Binding DeleteSelectedWorkCommand}"/>
+                <Button Content="Применить изменения" Command="{Binding AcceptChangesCommand}"/>
+            </StackPanel>
+        </Grid>
+        <ListBox ItemsSource="{Binding WorksInCycles}" SelectedItem="{Binding SelectedWork}"/>
+    </DockPanel>
+</Window>

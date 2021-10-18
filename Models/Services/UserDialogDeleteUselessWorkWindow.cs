@@ -22,15 +22,16 @@ namespace AstLab3.Models.Services
 
 		public bool Edit(NetworkSchedule toEdit)
 		{
-			DeleteUselessWorkWindow deleteUselessWindow = new DeleteUselessWorkWindow();
-			DeleteUselessWorkWindowViewModel deleteUselessWorkWindowViewModel =
+			DeleteUselessWorkWindow window = new DeleteUselessWorkWindow();
+			DeleteUselessWorkWindowViewModel model =
 				new DeleteUselessWorkWindowViewModel(_deleteUselessWorkWindowData, toEdit, _logger);
-			deleteUselessWorkWindowViewModel.CloseWindow += (_, e) =>
+			window.DataContext = model;
+			model.CloseWindow += (_, e) =>
 			{
-				deleteUselessWindow.DialogResult = e.DialogResult;
-				deleteUselessWindow.Close();
+				window.DialogResult = e.DialogResult;
+				window.Close();
 			};
-			return deleteUselessWindow.ShowDialog() ?? false;
+			return window.ShowDialog() ?? false;
 		}
 	}
 }
