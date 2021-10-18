@@ -29,6 +29,7 @@ namespace AstLab3.ViewModels
 			SelectWorkToDeleteCommand = new LambdaCommand(OnSelectWorkToDeleteCommandExecuted, CanSelectWorkToDeleteCommandExecute);
 			DeleteCommand = new LambdaCommand(OnDeleteCommandExecuted, CanDeleteCommandExecute);
 			CancelCommand = new LambdaCommand(OnCancelCommandExecuted, CanCancelCommandExecute);
+			_logger.LogMessage("Инициализировано окно для удаления частично повторяющихся работ");
 		}
 		private bool _deleteFirstWorkIsNecessary = false;
 		public bool DeleteFirstWorkIsNecessary { get => _deleteFirstWorkIsNecessary; set => Set(ref _deleteFirstWorkIsNecessary, value); }
@@ -45,7 +46,34 @@ namespace AstLab3.ViewModels
 		public ICommand DeleteCommand { get; }
 		private void OnDeleteCommandExecuted(object p)
 		{
-
+			bool? result;
+			if (DeleteFirstWorkIsNecessary)
+			{
+				if (_networkSchedule.Table.Remove(_deleteUselessWorkWindowData.FirstWorkToDelete))
+				{
+					_logger.LogMessage($"Работа {_deleteUselessWorkWindowData.FirstWorkToDelete} успешно удалена");
+					result = true;
+				}
+				else
+				{
+					_logger.LogMessage($"Не удалось удалить работу {_deleteUselessWorkWindowData.FirstWorkToDelete}");
+					result = false;
+				}
+			}
+			else
+			{
+				if (_networkSchedule.Table.Remove(_deleteUselessWorkWindowData.SecondWorkToDelete))
+				{
+					_logger.LogMessage($"Работа {_deleteUselessWorkWindowData.SecondWorkToDelete} успешно удалена");
+					result = true;
+				}
+				else
+				{
+					_logger.LogMessage($"Не удалось удалить работу {_deleteUselessWorkWindowData.SecondWorkToDelete}");
+					result = false;
+				}
+			}
+			OnCloseWindow(new UserDialogEventArgs(result));
 		}
 		private bool CanDeleteCommandExecute(object p) => true;
 
@@ -53,7 +81,8 @@ namespace AstLab3.ViewModels
 		public ICommand CancelCommand { get; }
 		private void OnCancelCommandExecuted(object p)
 		{
-
+			_logger.LogMessage("Пользователь не удалил ни одну из работ");
+			OnCloseWindow(new UserDialogEventArgs(false));
 		}
 		private bool CanCancelCommandExecute(object p) => true;
 
@@ -65,11 +94,13 @@ namespace AstLab3.ViewModels
 			{
 				DeleteFirstWorkIsNecessary = true;
 				DeleteSecondWorkIsNecessary = false;
+				_logger.LogMessage($"Пользователь отметил работу {FirstWorkToDelete}");
 			}
 			else
 			{
 				DeleteSecondWorkIsNecessary = true;
 				DeleteFirstWorkIsNecessary = false;
+				_logger.LogMessage($"Пользователь отметил работу {SecondWorkToDelete}");
 			}
 		}
 
