@@ -112,8 +112,12 @@
                         </StackPanel>
                         <DockPanel Grid.Row="1">
                             <TextBlock Text="Частично упорядоченный график" DockPanel.Dock="Top"/>
-                            <Button Content="Очистить" DockPanel.Dock="Bottom" Width="75" HorizontalAlignment="Right"
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right">
+                                <Button Content="График Ганта" Margin="5, 0"/>
+                                <Button Content="Очистить" Width="75" HorizontalAlignment="Right"
                                 Command="{Binding ClearFinalTableCommand}"/>
+                            </StackPanel>
+                            
                             <DataGrid Margin="0,5" ItemsSource="{Binding FinalTable}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Событие А" Width="*" Binding="{Binding StartVertex.ID}"/>

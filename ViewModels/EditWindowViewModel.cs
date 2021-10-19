@@ -121,7 +121,6 @@ namespace AstLab3.ViewModels
 		public ObservableCollection<Vertex> VerticesCanBeDeleted { get; set; } =
 			new ObservableCollection<Vertex>();
 
-		private bool _deletingCommandExecute = false;
 		private Vertex _selectedVertexToDelete;
 		public Vertex SelectedVertexToDelete
 		{
