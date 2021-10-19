@@ -26,9 +26,20 @@ namespace AstLab3.Models.Schedules
 		public NetworkSchedule(ICollection<Work> works)
 		{
 			Table = new List<Work>();
+			Vertex startVertex, endVertex;
+			Work work;
 			foreach (var item in works)
 			{
-				Table.Add(item.Clone());
+				if ((startVertex = GetVertexById(item.StartVertex.ID)) == null)
+				{
+					startVertex = new Vertex(item.StartVertex.ID);
+				}
+				if ((endVertex = GetVertexById(item.EndVertex.ID)) == null)
+				{
+					endVertex = new Vertex(item.EndVertex.ID);
+				}
+				work = new Work(startVertex, endVertex, item.Length);
+				Table.Add(work);
 			}
 		}
 
