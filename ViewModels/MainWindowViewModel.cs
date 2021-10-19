@@ -289,6 +289,10 @@ namespace AstLab3.ViewModels
 						_logger.LogMessage("Старт процедуры 'частичного упорядочивания'");
 						_networkSchedule.FindAllPaths(AddVertexToFullPaths, new List<int>(), _logger);
 						isNetworkScheduleStreamlined = true;
+						_networkSchedule.CalculateVerticesParameters();
+						CopySourceCollectionToOtherCollection(_networkSchedule.Table, FinalTable);
+						CriticalPathLength = _networkSchedule.Table[^1].EndVertex.LateCompletionDate;
+						CopySourceCollectionToOtherCollection(_networkSchedule.GetCritalcWorks(), WorksInCriticalPaths);
 					}
 					catch (CyclesFoundException e)
 					{
@@ -357,6 +361,15 @@ namespace AstLab3.ViewModels
 				path += vertex.ToString() + " ";
 			}
 			FullPathsInTheGraph.Add(path);
+		}
+
+		private static void CopySourceCollectionToOtherCollection<T>(ICollection<T> source, ICollection<T> other)
+		{
+			other.Clear();
+			foreach (var item in source)
+			{
+				other.Add(item);
+			}
 		}
 	}
 }

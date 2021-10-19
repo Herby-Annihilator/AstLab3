@@ -425,5 +425,18 @@ namespace AstLab3.Models.Schedules
 			}
 		}
 		#endregion
+
+		public List<Work> GetCritalcWorks(bool isNetworkScheduleStreamlined = true)
+		{
+			List<Work> result = new List<Work>();
+			if (!isNetworkScheduleStreamlined)
+				Streamline();
+			foreach (var item in Table)
+			{
+				if (item.FullTimeReserve == 0)
+					result.Add(item);
+			}
+			return result;
+		}
 	}
 }

@@ -57,6 +57,8 @@ namespace AstLab3.Models.Schedules
 			return Equals(work);
 		}
 
+		public override int GetHashCode() => base.GetHashCode();
+
 		public static bool operator ==(Work left, Work right)
 		{
 			if (((object)left) == null || ((object)right) == null)
