@@ -4,9 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AstLab3.Views.Windows"
+        xmlns:oxy="http://oxyplot.org/wpf" xmlns:viewmodels="clr-namespace:AstLab3.ViewModels"
         mc:Ignorable="d"
-        Title="UserInformatorGanttChartWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        Title="UserInformatorGanttChartWindow" Height="450" Width="800"
+        d:DataContext="{d:DesignInstance viewmodels:UserInformatorGanttChartWindowViewModel, IsDesignTimeCreatable=True}"
+        >
+    <DockPanel>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Margin="3" HorizontalAlignment="Right">
+            <Button Content="Закрыть" Width="100"/>
+        </StackPanel>
+        <oxy:PlotView>
+            
+        </oxy:PlotView>
+    </DockPanel>
 </Window>
