@@ -6,7 +6,7 @@
         xmlns:vm="clr-namespace:AstLab3.ViewModels"
         xmlns:local="clr-namespace:AstLab3.Views.Windows"
         mc:Ignorable="d"
-        Title="DeleteUselessWorkWindow" Height="450" Width="800"
+        Title="DeleteUselessWorkWindow" Height="204" Width="478"
         d:DataContext="{d:DesignInstance vm:DeleteUselessWorkWindowViewModel, IsDesignTimeCreatable=True}"
         >
     <DockPanel>

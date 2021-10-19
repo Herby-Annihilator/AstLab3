@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace AstLab3.Models.Schedules
 {
-	public class Vertex
+	public class Vertex : IEquatable<Vertex>
 	{
 		public int ID { get; set; }
 		public int EarlyCompletionDate { get; set; }
@@ -24,15 +25,40 @@ namespace AstLab3.Models.Schedules
 			return result;
 		}
 
-		public override bool Equals(object obj) => ((Vertex)obj).ID == this.ID;
+		public override bool Equals(object obj)
+		{
+			if (obj == null)
+				return false;
+			Vertex vertex = obj as Vertex;
+			return Equals(vertex);
+		}
 
-		public static bool operator ==(Vertex left, Vertex right) => left.Equals(right);
+		public static bool operator ==(Vertex left, Vertex right)
+		{
+			if (((object)left) == null || ((object)right) == null)
+				return Object.Equals(left, right);
 
-		public static bool operator !=(Vertex left, Vertex right) => !left.Equals(right);
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(Vertex left, Vertex right)
+		{
+			if (((object)left) == null || ((object)right) == null)
+				return !Object.Equals(left, right);
+
+			return !(left.Equals(right));
+		}
 
 		public override int GetHashCode() => ID;
 
-		public override string ToString() => base.ToString();
+		public override string ToString() => ID.ToString();
+
+		public bool Equals([AllowNull] Vertex other)
+		{
+			if (other == null)
+				return false;
+			return ID == other.ID;
+		}
 
 		public static bool operator <(Vertex left, Vertex right) => left.ID < right.ID;
 

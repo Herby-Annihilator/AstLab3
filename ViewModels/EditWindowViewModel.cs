@@ -130,11 +130,9 @@ namespace AstLab3.ViewModels
 			{
 				Set(ref _selectedVertexToDelete, value);
 				AdjacencyEdgesWillBeDeleted.Clear();
-				_deletingCommandExecute = false;
 				List<Work> works;
-				if (!_adjacencyList.TryGetValue(_selectedVertexToDelete.ID, out works))
+				if (_selectedVertexToDelete == null || !_adjacencyList.TryGetValue(_selectedVertexToDelete.ID, out works))
 					return;
-				_deletingCommandExecute = true;
 				foreach (Work work in works)
 				{
 					AdjacencyEdgesWillBeDeleted.Add(work);
@@ -211,17 +209,16 @@ namespace AstLab3.ViewModels
 			try
 			{
 				_deletedVertices.Add(SelectedVertexToDelete);
-				VerticesCanBeDeleted.Remove(SelectedVertexToDelete);
-				AdjacencyEdgesWillBeDeleted.Clear();
-				_deletingCommandExecute = false;
 				Status = $"Вершина {SelectedVertexToDelete.ID} удалена. Чтобы изменения вступили в силу, нажмите 'OK'";
+				VerticesCanBeDeleted.Remove(SelectedVertexToDelete);
+				AdjacencyEdgesWillBeDeleted.Clear();  // даже не нужно это делать
 			}
 			catch (Exception e)
 			{
 				Status = e.Message;
 			}
 		}
-		private bool CanDeleteVerticesCommandExecute(object p) => _deletingCommandExecute;
+		private bool CanDeleteVerticesCommandExecute(object p) => SelectedVertexToDelete != null;
 		#endregion
 
 		#region DeleteEdgesCommand
@@ -231,8 +228,8 @@ namespace AstLab3.ViewModels
 			try
 			{
 				_deletedWorks.Add(SelectedWorkToDelete);
-				WorksThatCanBeDeleted.Remove(SelectedWorkToDelete);
 				Status = $"Работа {SelectedWorkToDelete} удалена";
+				WorksThatCanBeDeleted.Remove(SelectedWorkToDelete);			
 				SelectedWorkToDelete = null;
 			}
 			catch (Exception e)
@@ -336,11 +333,14 @@ namespace AstLab3.ViewModels
 		private void Connect(int fakeVertexIndex, int[] indexes)
 		{
 			_createdWorks.Clear();
+			Vertex vertex;
 			if (EditingMode == EditingMode.StartVertexMode)
 			{
 				for (int i = 0; i < indexes.Length; i++)
 				{
-					_createdWorks.Add(new Work(_networkSchedule.GetVertexById(fakeVertexIndex),
+					if ((vertex = _networkSchedule.GetVertexById(fakeVertexIndex)) == null)
+						vertex = new Vertex(fakeVertexIndex);
+					_createdWorks.Add(new Work(vertex,
 						_networkSchedule.GetVertexById(indexes[i]), 0));
 				}
 			}
@@ -348,8 +348,10 @@ namespace AstLab3.ViewModels
 			{
 				for (int i = 0; i < indexes.Length; i++)
 				{
+					if ((vertex = _networkSchedule.GetVertexById(fakeVertexIndex)) == null)
+						vertex = new Vertex(fakeVertexIndex);
 					_createdWorks.Add(new Work(_networkSchedule.GetVertexById(indexes[i]),
-						_networkSchedule.GetVertexById(fakeVertexIndex), 0));
+						vertex, 0));
 				}
 			}
 		}

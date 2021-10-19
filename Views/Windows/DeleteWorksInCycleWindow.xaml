@@ -6,8 +6,8 @@
         xmlns:vm="clr-namespace:AstLab3.ViewModels"
         xmlns:local="clr-namespace:AstLab3.Views.Windows"
         mc:Ignorable="d"
-        Title="DeleteWorksInCycleWindow" Height="450" Width="800"
-        d:DataContext="{d:DesignInstance vm:DeleteWorksInCycleWindowViewModel, IsDesignTimeCreatable=True}"
+        Title="DeleteWorksInCycleWindow" Height="450" Width="383"
+        d:DataContext="{d:DesignInstance vm:DeleteWorksInCycleWindowViewModel, IsDesignTimeCreatable=True}" ResizeMode="NoResize"
         >
     <DockPanel>
         <StackPanel DockPanel.Dock="Top" HorizontalAlignment="Center">

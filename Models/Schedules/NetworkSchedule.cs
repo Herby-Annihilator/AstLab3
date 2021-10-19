@@ -14,7 +14,8 @@ namespace AstLab3.Models.Schedules
 
 		public Vertex GetVertexById(int id)
 		{
-			foreach (var item in Vertices)
+			var vertices = GetVerticesList(Table);
+			foreach (var item in vertices)
 			{
 				if (id == item.ID)
 					return item;
