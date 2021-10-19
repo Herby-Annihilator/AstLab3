@@ -58,9 +58,40 @@ namespace AstLab3.Models.Schedules
 
 		private void CopySourceTableToWorkingTable(ICollection<Work> source, ICollection<Work> working)
 		{
-			foreach (Work work in source)
+			Vertex startVertex, endVertex;
+			Work work;
+			bool startVertexContains, endVertexContains;
+			List<Vertex> tmp = new List<Vertex>();
+			foreach (Work item in source)
 			{
-				working.Add(work.Clone());
+				startVertexContains = false;
+				endVertexContains = false;
+				startVertex = item.StartVertex.Clone();
+				endVertex = item.EndVertex.Clone();
+				foreach (var vertex in tmp)
+				{
+					if (vertex.ID == startVertex.ID)
+					{
+						startVertex = vertex;
+						startVertexContains = true;
+						break;
+					}
+				}
+				if (!startVertexContains)
+					tmp.Add(startVertex);
+				foreach (var vertex in tmp)
+				{
+					if (vertex.ID == endVertex.ID)
+					{
+						endVertex = vertex;
+						endVertexContains = true;
+						break;
+					}
+				}
+				if (!endVertexContains)
+					tmp.Add(endVertex);
+				work = new Work(startVertex, endVertex, item.Length);
+				working.Add(work);
 			}
 		}
 

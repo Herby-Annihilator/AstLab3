@@ -8,8 +8,8 @@ namespace AstLab3.Models.Schedules
 	public class Vertex : IEquatable<Vertex>
 	{
 		public int ID { get; set; }
-		public int EarlyCompletionDate { get; set; }
-		public int LateCompletionDate { get; set; }
+		public int EarlyCompletionDate { get; set; } = 0;
+		public int LateCompletionDate { get; set; } = int.MaxValue;
 		public int ReserveTime => LateCompletionDate - EarlyCompletionDate;
 
 		public Vertex(int id)
