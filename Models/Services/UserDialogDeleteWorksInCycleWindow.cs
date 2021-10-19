@@ -25,6 +25,8 @@ namespace AstLab3.Models.Services
 			DeleteWorksInCycleWindow window = new DeleteWorksInCycleWindow();
 			DeleteWorksInCycleWindowViewModel model = new DeleteWorksInCycleWindowViewModel(_deleteWorksInCycleWindowData, toEdit, _logger);
 			window.DataContext = model;
+			window.Owner = App.Current.MainWindow;
+			window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
 			model.CloseWindow += (_, e) =>
 			{
 				window.DialogResult = e.DialogResult;

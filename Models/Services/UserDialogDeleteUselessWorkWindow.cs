@@ -26,6 +26,8 @@ namespace AstLab3.Models.Services
 			DeleteUselessWorkWindowViewModel model =
 				new DeleteUselessWorkWindowViewModel(_deleteUselessWorkWindowData, toEdit, _logger);
 			window.DataContext = model;
+			window.Owner = App.Current.MainWindow;
+			window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
 			model.CloseWindow += (_, e) =>
 			{
 				window.DialogResult = e.DialogResult;

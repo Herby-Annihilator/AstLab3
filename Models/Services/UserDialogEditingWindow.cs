@@ -19,6 +19,8 @@ namespace AstLab3.Models.Services
 			EditWindow editWindow = new EditWindow();
 			EditWindowViewModel editWindowViewModel = new EditWindowViewModel(_editingWindowData ,toEdit, _logger);
 			editWindow.DataContext = editWindowViewModel;
+			editWindow.Owner = App.Current.MainWindow;
+			editWindow.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
 			editWindowViewModel.CloseWindow += (_, e) =>
 			{
 				editWindow.DialogResult = e.DialogResult;

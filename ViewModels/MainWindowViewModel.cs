@@ -293,6 +293,8 @@ namespace AstLab3.ViewModels
 						CopySourceCollectionToOtherCollection(_networkSchedule.Table, FinalTable);
 						CriticalPathLength = _networkSchedule.Table[^1].EndVertex.LateCompletionDate;
 						CopySourceCollectionToOtherCollection(_networkSchedule.GetCritalcWorks(), WorksInCriticalPaths);
+						CopySourceCollectionToOtherCollection(_networkSchedule.Vertices, Vertices);
+						_logger.LogMessage("Конец процедуры 'частичного упорядочивания'");
 					}
 					catch (CyclesFoundException e)
 					{

@@ -405,19 +405,19 @@ namespace AstLab3.Models.Schedules
 				}
 			}
 		}
-		private void UpdateProcessedVerticesOnSecondStep(List<Vertex> processedVertices, Vertex nextVertex)
+		private void UpdateProcessedVerticesOnSecondStep(List<Vertex> processedVertices, Vertex endVertex)
 		{
-			if (!processedVertices.Contains(nextVertex))
+			if (!processedVertices.Contains(endVertex))
 				return;
 			foreach (var item in Table)
 			{
-				if (item.EndVertex == nextVertex)
+				if (item.EndVertex == endVertex)
 				{
 					if (processedVertices.Contains(item.StartVertex))
 					{
-						if (item.StartVertex.LateCompletionDate > nextVertex.LateCompletionDate - item.Length)
+						if (item.StartVertex.LateCompletionDate > endVertex.LateCompletionDate - item.Length)
 						{
-							item.StartVertex.LateCompletionDate = nextVertex.LateCompletionDate - item.Length;
+							item.StartVertex.LateCompletionDate = endVertex.LateCompletionDate - item.Length;
 							UpdateProcessedVerticesOnSecondStep(processedVertices, item.StartVertex);
 						}
 					}
