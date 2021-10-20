@@ -113,7 +113,7 @@
                         <DockPanel Grid.Row="1">
                             <TextBlock Text="Частично упорядоченный график" DockPanel.Dock="Top"/>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right">
-                                <Button Content="График Ганта" Margin="5, 0"/>
+                                <Button Content="График Ганта" Margin="5, 0" Command="{Binding ShowGanttChartCommand}"/>
                                 <Button Content="Очистить" Width="75" HorizontalAlignment="Right"
                                 Command="{Binding ClearFinalTableCommand}"/>
                             </StackPanel>

@@ -11,10 +11,8 @@
         >
     <DockPanel>
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Margin="3" HorizontalAlignment="Right">
-            <Button Content="Закрыть" Width="100"/>
+            <Button Content="Закрыть" Width="100" Command="{Binding CloseCommand}"/>
         </StackPanel>
-        <oxy:PlotView>
-            
-        </oxy:PlotView>
+        <oxy:PlotView Model="{Binding PlotModel}"/>
     </DockPanel>
 </Window>

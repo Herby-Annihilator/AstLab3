@@ -41,6 +41,7 @@ namespace AstLab3.ViewModels
 			ClearVerticescParamsTableCommand = new LambdaCommand(OnClearVerticescParamsTableCommandExecuted, 
 				CanClearVerticescParamsTableCommandExecute);
 			StreamlineCommand = new LambdaCommand(OnStreamlineCommandExecuted, CanStreamlineCommandExecute);
+			ShowGanttChartCommand = new LambdaCommand(OnShowGanttChartCommandExecuted, CanShowGanttChartCommandExecute);
 		}
 
 		private void LogMessageToLogFile(object sender, LoggerEventArgs e)
@@ -331,6 +332,24 @@ namespace AstLab3.ViewModels
 			}
 		}
 		private bool CanStreamlineCommandExecute(object p) => SourceTable.Count > 0;
+		#endregion
+
+		#region ShowGanttChartCommand
+		public ICommand ShowGanttChartCommand { get; }
+		private void OnShowGanttChartCommandExecuted(object p)
+		{
+			try
+			{
+				UserInformatorGanttChart informator = new UserInformatorGanttChart(_logger);
+				informator.Show(_networkSchedule);
+			}
+			catch(Exception e)
+			{
+				Status = e.Message;
+				_logger.LogMessage(Status);
+			}
+		}
+		private bool CanShowGanttChartCommandExecute(object p) => true; 
 		#endregion
 
 		#endregion
