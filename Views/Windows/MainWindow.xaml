@@ -126,7 +126,7 @@
                                 Command="{Binding ClearFinalTableCommand}"/>
                             </UniformGrid>
                             
-                            <DataGrid Margin="0,5" ItemsSource="{Binding FinalTable}">
+                            <DataGrid Margin="0,5" ItemsSource="{Binding FinalTable}" SelectedItem="{Binding WorkToChangeOrRemove}">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Событие А" Width="*" Binding="{Binding StartVertex.ID}"/>
                                     <DataGridTextColumn Header="Событие В" Width="*" Binding="{Binding EndVertex.ID}"/>
