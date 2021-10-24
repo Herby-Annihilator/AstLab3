@@ -42,6 +42,10 @@ namespace AstLab3.ViewModels
 				CanClearVerticescParamsTableCommandExecute);
 			StreamlineCommand = new LambdaCommand(OnStreamlineCommandExecuted, CanStreamlineCommandExecute);
 			ShowGanttChartCommand = new LambdaCommand(OnShowGanttChartCommandExecuted, CanShowGanttChartCommandExecute);
+			AddWorkToNetworkScheduleCommand = new LambdaCommand(OnAddWorkToNetworkScheduleCommandExecuted,
+				CanAddWorkToNetworkScheduleCommandExecute);
+			ChangeWorkCommand = new LambdaCommand(OnChangeWorkCommandExecuted, CanChangeWorkCommandExecute);
+			RemoveWorkCommand = new LambdaCommand(OnRemoveWorkCommandExecuted, CanRemoveWorkCommandExecute);
 		}
 
 		private void LogMessageToLogFile(object sender, LoggerEventArgs e)
@@ -70,6 +74,8 @@ namespace AstLab3.ViewModels
 		public ObservableCollection<Vertex> Vertices { get; private set; } = new ObservableCollection<Vertex>();
 
 		public Work SelectedWork { get; set; }
+
+		public Work WorkToChangeOrRemove { get; set; }
 
 		private string _title = "Title";
 		public string Title { get => _title; set => Set(ref _title, value); }
@@ -282,46 +288,7 @@ namespace AstLab3.ViewModels
 		{
 			try
 			{
-				bool isNetworkScheduleStreamlined = false;
-				while (!isNetworkScheduleStreamlined)
-				{
-					try
-					{
-						_logger.LogMessage("Старт процедуры 'частичного упорядочивания'");
-						_networkSchedule.FindAllPaths(AddVertexToFullPaths, new List<int>(), _logger);
-						isNetworkScheduleStreamlined = true;
-						_networkSchedule.CalculateVerticesParameters();
-						CopySourceCollectionToOtherCollection(_networkSchedule.Table, FinalTable);
-						CriticalPathLength = _networkSchedule.Table[^1].EndVertex.LateCompletionDate;
-						CopySourceCollectionToOtherCollection(_networkSchedule.GetCritalcWorks(), WorksInCriticalPaths);
-						CopySourceCollectionToOtherCollection(_networkSchedule.Vertices, Vertices);
-						_logger.LogMessage("Конец процедуры 'частичного упорядочивания'");
-					}
-					catch (CyclesFoundException e)
-					{
-						DeleteWorksInCycleWindowData data = new DeleteWorksInCycleWindowData(e.WorksInCycle);
-						UserDialogDeleteWorksInCycleWindow dialog = new UserDialogDeleteWorksInCycleWindow(_logger, data);
-						dialog.Edit(_networkSchedule);
-					}
-					catch (SeveralVerticesFoundException e)
-					{
-						EditingWindowData data = new EditingWindowData(e.Vertices, e.EditingMode, e.Message);
-						UserDialogEditingWindow dialog = new UserDialogEditingWindow(data, _logger);
-						dialog.Edit(_networkSchedule);
-					}
-					catch (NoVerticesFoundException e)
-					{
-						EditingWindowData data = new EditingWindowData(new List<Vertex>(), e.EditingMode, e.Message);
-						UserDialogEditingWindow dialog = new UserDialogEditingWindow(data, _logger);
-						dialog.Edit(_networkSchedule);
-					}
-					catch (OverlappingWorksFoundException e)
-					{
-						DeleteUselessWorkWindowData data = new DeleteUselessWorkWindowData(e.FirstWorkToDelete, e.SecondWorkToDelete);
-						UserDialogDeleteUselessWorkWindow dialog = new UserDialogDeleteUselessWorkWindow(_logger, data);
-						dialog.Edit(_networkSchedule);
-					}
-				}
+				Streamline();
 				Status = "Упорядочивание прошло успешно";
 				_logger.LogMessage(Status);
 			}
@@ -332,6 +299,74 @@ namespace AstLab3.ViewModels
 			}
 		}
 		private bool CanStreamlineCommandExecute(object p) => SourceTable.Count > 0;
+		#endregion
+
+		#region AddWorkToNetworkScheduleCommand
+		public ICommand AddWorkToNetworkScheduleCommand { get; }
+		private void OnAddWorkToNetworkScheduleCommandExecuted(object p)
+		{
+			try
+			{
+				UserDialogAddWorkWindow dialog = new UserDialogAddWorkWindow(_logger);
+				dialog.Edit(_networkSchedule);
+				Streamline();
+			}
+			catch (Exception e)
+			{
+				Status = e.Message;
+				_logger.LogMessage(Status);
+			}
+		}
+		private bool CanAddWorkToNetworkScheduleCommandExecute(object p) => true;
+		#endregion
+
+		#region ChangeWorkCommand
+		public ICommand ChangeWorkCommand { get; }
+		private void OnChangeWorkCommandExecuted(object p)
+		{
+			try
+			{
+				UserDialogChangeWorkWindow dialog = new UserDialogChangeWorkWindow(
+					new ChangeWorkWindowData(WorkToChangeOrRemove), _logger);
+				dialog.Edit(_networkSchedule);
+				_networkSchedule.CalculateVerticesParameters();
+				CopySourceCollectionToOtherCollection(_networkSchedule.Table, FinalTable);
+				CriticalPathLength = _networkSchedule.Table[^1].EndVertex.LateCompletionDate;
+				CopySourceCollectionToOtherCollection(_networkSchedule.GetCritalcWorks(), WorksInCriticalPaths);
+				CopySourceCollectionToOtherCollection(_networkSchedule.Vertices, Vertices);
+			}
+			catch (Exception e)
+			{
+				Status = e.Message;
+				_logger.LogMessage(Status);
+			}
+		}
+		private bool CanChangeWorkCommandExecute(object p) => WorkToChangeOrRemove != null;
+		#endregion
+
+		#region RemoveWorkCommand
+		public ICommand RemoveWorkCommand { get; }
+		private void OnRemoveWorkCommandExecuted(object p)
+		{
+			try
+			{
+				if (!_networkSchedule.Table.Remove(WorkToChangeOrRemove))
+				{
+					_logger.LogMessage($"Работа {WorkToChangeOrRemove} не была удалена.");
+				}
+				else
+				{
+					_logger.LogMessage($"Работа удалена.");
+					Streamline();
+				}
+			}
+			catch (Exception e)
+			{
+				Status = e.Message;
+				_logger.LogMessage(Status);
+			}
+		}
+		private bool CanRemoveWorkCommandExecute(object p) => WorkToChangeOrRemove != null; 
 		#endregion
 
 		#region ShowGanttChartCommand
@@ -390,6 +425,51 @@ namespace AstLab3.ViewModels
 			foreach (var item in source)
 			{
 				other.Add(item);
+			}
+		}
+
+		private void Streamline()
+		{
+			bool isNetworkScheduleStreamlined = false;
+			while (!isNetworkScheduleStreamlined)
+			{
+				try
+				{
+					_logger.LogMessage("Старт процедуры 'частичного упорядочивания'");
+					FullPathsInTheGraph.Clear();
+					_networkSchedule.FindAllPaths(AddVertexToFullPaths, new List<int>(), _logger);
+					isNetworkScheduleStreamlined = true;
+					_networkSchedule.CalculateVerticesParameters();
+					CopySourceCollectionToOtherCollection(_networkSchedule.Table, FinalTable);
+					CriticalPathLength = _networkSchedule.Table[^1].EndVertex.LateCompletionDate;
+					CopySourceCollectionToOtherCollection(_networkSchedule.GetCritalcWorks(), WorksInCriticalPaths);
+					CopySourceCollectionToOtherCollection(_networkSchedule.Vertices, Vertices);
+					_logger.LogMessage("Конец процедуры 'частичного упорядочивания'");
+				}
+				catch (CyclesFoundException e)
+				{
+					DeleteWorksInCycleWindowData data = new DeleteWorksInCycleWindowData(e.WorksInCycle);
+					UserDialogDeleteWorksInCycleWindow dialog = new UserDialogDeleteWorksInCycleWindow(_logger, data);
+					dialog.Edit(_networkSchedule);
+				}
+				catch (SeveralVerticesFoundException e)
+				{
+					EditingWindowData data = new EditingWindowData(e.Vertices, e.EditingMode, e.Message);
+					UserDialogEditingWindow dialog = new UserDialogEditingWindow(data, _logger);
+					dialog.Edit(_networkSchedule);
+				}
+				catch (NoVerticesFoundException e)
+				{
+					EditingWindowData data = new EditingWindowData(new List<Vertex>(), e.EditingMode, e.Message);
+					UserDialogEditingWindow dialog = new UserDialogEditingWindow(data, _logger);
+					dialog.Edit(_networkSchedule);
+				}
+				catch (OverlappingWorksFoundException e)
+				{
+					DeleteUselessWorkWindowData data = new DeleteUselessWorkWindowData(e.FirstWorkToDelete, e.SecondWorkToDelete);
+					UserDialogDeleteUselessWorkWindow dialog = new UserDialogDeleteUselessWorkWindow(_logger, data);
+					dialog.Edit(_networkSchedule);
+				}
 			}
 		}
 	}

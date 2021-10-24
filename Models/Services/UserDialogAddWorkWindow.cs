@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AstLab3.ViewModels;
+﻿using AstLab3.ViewModels;
 using AstLab3.Views.Windows;
 using AstLab3.Models.Schedules;
 using AstLab3.Models.Services.Interfaces;

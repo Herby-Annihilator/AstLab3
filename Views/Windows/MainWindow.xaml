@@ -119,9 +119,9 @@
                                     </Style>
                                 </UniformGrid.Resources>
                                 <Button Content="График Ганта" Command="{Binding ShowGanttChartCommand}"/>
-                                <Button Content="Изменить"/>
-                                <Button Content="Удалить"/>
-                                <Button Content="Добавить"/>
+                                <Button Content="Изменить" Command="{Binding ChangeWorkCommand}"/>
+                                <Button Content="Удалить" Command="{Binding RemoveWorkCommand}"/>
+                                <Button Content="Добавить" Command="{Binding AddWorkToNetworkScheduleCommand}"/>
                                 <Button Content="Очистить"
                                 Command="{Binding ClearFinalTableCommand}"/>
                             </UniformGrid>
