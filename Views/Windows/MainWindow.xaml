@@ -112,11 +112,19 @@
                         </StackPanel>
                         <DockPanel Grid.Row="1">
                             <TextBlock Text="Частично упорядоченный график" DockPanel.Dock="Top"/>
-                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right">
-                                <Button Content="График Ганта" Margin="5, 0" Command="{Binding ShowGanttChartCommand}"/>
-                                <Button Content="Очистить" Width="75" HorizontalAlignment="Right"
+                            <UniformGrid Rows="2" DockPanel.Dock="Bottom">
+                                <UniformGrid.Resources>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Margin" Value="3"/>
+                                    </Style>
+                                </UniformGrid.Resources>
+                                <Button Content="График Ганта" Command="{Binding ShowGanttChartCommand}"/>
+                                <Button Content="Изменить"/>
+                                <Button Content="Удалить"/>
+                                <Button Content="Добавить"/>
+                                <Button Content="Очистить"
                                 Command="{Binding ClearFinalTableCommand}"/>
-                            </StackPanel>
+                            </UniformGrid>
                             
                             <DataGrid Margin="0,5" ItemsSource="{Binding FinalTable}">
                                 <DataGrid.Columns>

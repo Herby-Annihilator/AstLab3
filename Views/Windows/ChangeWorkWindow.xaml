@@ -1,0 +1,62 @@
+﻿<Window x:Class="AstLab3.Views.Windows.ChangeWorkWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AstLab3.Views.Windows"
+        xmlns:vm="clr-namespace:AstLab3.ViewModels"
+        mc:Ignorable="d"
+        Title="ChangeWorkWindow" Height="333" Width="320"
+        d:DataContext="{d:DesignInstance vm:ChangeWorkWindowViewModel, IsDesignTimeCreatable=True}"
+        >
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Text="В этом окне Вы можете изменить продолжительность выбранной работы" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center"/>
+        <UniformGrid DockPanel.Dock="Bottom" Rows="1">
+            <UniformGrid.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Margin" Value="3"/>
+                </Style>
+            </UniformGrid.Resources>
+            <Button Content="Отмена" Command="{Binding CancelCommand}"/>
+            <Button Content="Ок" Command="{Binding ApplyCommand}"/>
+        </UniformGrid>
+        <Grid>
+            <Grid.Resources>
+                <Style TargetType="TextBlock">
+                    <Style.Triggers>
+                        <Trigger Property="Grid.Column" Value="0">
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                            <Setter Property="TextWrapping" Value="Wrap"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+                <Style TargetType="TextBox">
+                    <Style.Triggers>
+                        <Trigger Property="Grid.Column" Value="1">
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="Margin" Value="3,0"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0" Text="Индекс начального события"/>
+            <TextBlock Grid.Column="0" Grid.Row="1" Text="Индекс конечного события"/>
+            <TextBlock Grid.Column="0" Grid.Row="2" Text="Продолжительность работы"/>
+            <TextBox Grid.Column="1" Grid.Row="0" IsEnabled="False" Text="{Binding SelectedWork.StartVertex.ID}"/>
+            <TextBox Grid.Column="1" Grid.Row="1" IsEnabled="False" Text="{Binding SelectedWork.EndVertex.ID}"/>
+            <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding WorksLength}"/>
+        </Grid>
+    </DockPanel>
+</Window>
