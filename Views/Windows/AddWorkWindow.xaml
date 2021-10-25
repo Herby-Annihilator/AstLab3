@@ -54,7 +54,7 @@
             <TextBlock Grid.Column="0" Grid.Row="1" Text="Индекс конечного события"/>
             <TextBlock Grid.Column="0" Grid.Row="2" Text="Продолжительность работы"/>
             <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding StartVertexIndex, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding StartVertexIndex, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding EndVertexIndex, UpdateSourceTrigger=PropertyChanged}"/>
             <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding WorksLength, UpdateSourceTrigger=PropertyChanged}"/>
         </Grid>
     </DockPanel>
