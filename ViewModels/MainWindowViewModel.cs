@@ -308,8 +308,8 @@ namespace AstLab3.ViewModels
 			try
 			{
 				UserDialogAddWorkWindow dialog = new UserDialogAddWorkWindow(_logger);
-				dialog.Edit(_networkSchedule);
-				Streamline();
+				if (dialog.Edit(_networkSchedule))
+					Streamline();
 			}
 			catch (Exception e)
 			{
@@ -328,12 +328,14 @@ namespace AstLab3.ViewModels
 			{
 				UserDialogChangeWorkWindow dialog = new UserDialogChangeWorkWindow(
 					new ChangeWorkWindowData(WorkToChangeOrRemove), _logger);
-				dialog.Edit(_networkSchedule);
-				_networkSchedule.CalculateVerticesParameters();
-				CopySourceCollectionToOtherCollection(_networkSchedule.Table, FinalTable);
-				CriticalPathLength = _networkSchedule.Table[^1].EndVertex.LateCompletionDate;
-				CopySourceCollectionToOtherCollection(_networkSchedule.GetCritalcWorks(), WorksInCriticalPaths);
-				CopySourceCollectionToOtherCollection(_networkSchedule.Vertices, Vertices);
+				if (dialog.Edit(_networkSchedule))
+				{
+					_networkSchedule.CalculateVerticesParameters();
+					CopySourceCollectionToOtherCollection(_networkSchedule.Table, FinalTable);
+					CriticalPathLength = _networkSchedule.Table[^1].EndVertex.LateCompletionDate;
+					CopySourceCollectionToOtherCollection(_networkSchedule.GetCritalcWorks(), WorksInCriticalPaths);
+					CopySourceCollectionToOtherCollection(_networkSchedule.Vertices, Vertices);
+				}
 			}
 			catch (Exception e)
 			{
