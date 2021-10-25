@@ -388,10 +388,21 @@ namespace AstLab3.Models.Schedules
 		#region CalculateVerticesParameters
 		public void CalculateVerticesParameters()
 		{
+			VerticesParametersToDefault();
 			FirstStep();
 			SecondStep();
 			if (Table[0].StartVertex.LateCompletionDate != 0)
 				throw new Exception("Позднее время наступления начального события != 0");
+		}
+		private void VerticesParametersToDefault()
+		{
+			foreach (var item in Table)
+			{
+				item.StartVertex.EarlyCompletionDate = 0;
+				item.StartVertex.LateCompletionDate = int.MaxValue;
+				item.EndVertex.EarlyCompletionDate = 0;
+				item.EndVertex.LateCompletionDate = int.MaxValue;
+			}
 		}
 		private void FirstStep()
 		{

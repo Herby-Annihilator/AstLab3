@@ -20,12 +20,13 @@ namespace AstLab3.Models.Services
 			var data = new AddWorkWindowViewModel(toEdit, _logger);
 			window.DataContext = data;
 			window.Owner = App.Current.MainWindow;
+			window.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
 			data.CloseWindow += (_, e) =>
 			{
 				window.DialogResult = e.DialogResult;
 				window.Close();
 			};
-			return window.DialogResult ?? false;
+			return window.ShowDialog() ?? false;
 		}
 	}
 }

@@ -59,7 +59,7 @@ namespace AstLab3.ViewModels
 			};
 			Random random = new Random();
 			IntervalBarItem item;
-			int currenrtCategoryIndex = 0;
+			int currenrtCategoryIndex = _networkSchedule.Table.Count - 1;
 			foreach (Work work in _networkSchedule.Table)
 			{
 				item = new IntervalBarItem
@@ -71,7 +71,7 @@ namespace AstLab3.ViewModels
 					Color = OxyColor.FromRgb((byte)random.Next(107, 222), (byte)random.Next(0, 227), (byte)random.Next(0, 82)),
 				};
 				barSeries.Items.Add(item);
-				currenrtCategoryIndex++;
+				currenrtCategoryIndex--;
 			}
 			PlotModel.Series.Add(barSeries);
 		}
